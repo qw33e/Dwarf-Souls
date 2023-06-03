@@ -67,10 +67,6 @@ uint8_t sprite_num=0;
 /* for checking random shit (better than malloc at least)*/
 int mptr=0;
 
-/*replacement for the floor function in divisions*/
-int floor(int x, int div) {
-    return (x-(x%div))/div;
-}
 
 void set_camera() {
     // update hardware scroll position
@@ -278,7 +274,19 @@ void enpush(){
 void enstop(){
     enxs[eva[needle][0]]=0;
     enys[eva[needle][0]]=0;
-    if (encan_move[eva[needle][0]]!=9) encan_move[eva[needle][0]]=0;
+    if (encan_move[eva[needle][0]]!=9) encan_move[eva[needle][0]]=1;
+}
+
+//to push the player
+void plpush(){
+    plxs+=eva[needle][0];
+    plys+=eva[needle][1];
+    can_move=0;
+}
+void plstop(){
+    plxs=0;
+    plys=0;
+    can_move=1;
 }
 
 
@@ -337,7 +345,7 @@ void hit(uint8_t num) {
 /*animations block, please label carefully*/
 void attack_4() {
     can_move=1;
-    move_sprite(1, 160,160);
+    move_sprite(1, 0,0);
 }
 void attack_3() {
     NR10_REG=0X00;
@@ -350,9 +358,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply<=eny[i]+8) && (eny[i]<=ply+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -361,9 +369,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply-8<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -372,9 +380,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx<=enx[i]+8) && (enx[i]<=plx+8) && (ply-8<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -383,9 +391,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply-8<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -394,9 +402,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply<=eny[i]+8) && (eny[i]<=ply+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -405,9 +413,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -416,9 +424,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx<=enx[i]+8) && (enx[i]<=plx+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -427,9 +435,9 @@ void attack_3() {
         for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
     }
@@ -446,9 +454,9 @@ void attack_2() {
     for (int i=0; i<en_num; i++) {
                     if ((plx+8*plright<=enx[i]+8) && (enx[i]<=plx+8*plright+8) && (ply+8*pldown<=eny[i]+8) && (eny[i]<=ply+8*pldown+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
 }
@@ -466,9 +474,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx<=enx[i]+8) && (enx[i]<=plx+8) && (ply-8<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -477,9 +485,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply-8<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -488,9 +496,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply<=eny[i]+8) && (eny[i]<=ply+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -499,9 +507,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx+8<=enx[i]+8) && (enx[i]<=plx+8+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -510,9 +518,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx<=enx[i]+8) && (enx[i]<=plx+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -521,9 +529,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply+8<=eny[i]+8) && (eny[i]<=ply+8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -532,9 +540,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply<=eny[i]+8) && (eny[i]<=ply+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -543,9 +551,9 @@ void attack_1() {
                     for (int i=0; i<en_num; i++) {
                     if ((plx-8<=enx[i]+8) && (enx[i]<=plx-8+8) && (ply-8+8*pldown<=eny[i]+8) && (eny[i]<=ply-8+8)) {
                         encan_move[i]=0, enxs[i]+=plright, enys[i]+=pldown;
-                        eva[evc][0]=i;
                         hit(i);
-                        event(150, enstop);
+                        event(10, enstop);
+                        eva[evc][0]=i;
                     }
                 }
                 }
@@ -557,6 +565,23 @@ void roll_1() {
 }
 
 
+void en_attack2() {
+    move_sprite(1, 0,0);
+    if (encan_move[eva[needle][0]]==0) encan_move[eva[needle][0]]=1;
+}
+
+void en_attack1() {
+    move_sprite(1,(eva[needle][1]-plx)+84,(eva[needle][2]-ply)+80);
+    //player position is 16bit, eva is 8 so we need to put it on the same scale
+    if ((abs((plx%256)-eva[needle][1])<5)&&(abs((ply%256)-eva[needle][2])<5)&&(can_move==1)){
+    can_move=0;
+    plxs=(plx-enx[eva[needle][0]])/abs(plx-enx[eva[needle][0]]);
+    plys+=(ply-eny[eva[needle][0]])/abs(ply-eny[eva[needle][0]]);
+    }
+    event(30, en_attack2);
+    eva[evc][0]=eva[needle][0];
+    event(20, plstop);
+}
 
 
 
@@ -612,6 +637,12 @@ void main(void) {
     //enemies
     make_enemy(0,10,108,120);
     make_enemy(0,10,148,120);
+    make_enemy(0,10,80,90);
+    make_enemy(0,10,60,150);
+    make_enemy(0,10,35,120);
+    make_enemy(0,10,40,120);
+    make_enemy(0,10,160,90);
+    make_enemy(0,10,150,150);
     SHOW_SPRITES;
     /* makes the health and stamina bars*/
     /*for (volatile int i=0; i<144; i++){
@@ -640,12 +671,16 @@ void main(void) {
             }
         }
             if (can_move==1)  {
-                if (joypad() & J_LEFT)plx--, plright=-1, set_sprite_prop(0,32), camera_x--, redraw = TRUE;
+                if (joypad() & J_LEFT)plx--,plright=-1, set_sprite_prop(0,32), camera_x--, redraw = TRUE;
                 else if (joypad() & J_RIGHT)plx++, plright=1, set_sprite_prop(0,0), camera_x++, redraw = TRUE;
                 else if ((joypad() & J_UP)||(joypad() & J_DOWN)) plright=0;
-                if (joypad() & J_UP)ply--,pldown=-1, camera_y--, redraw = TRUE;
-                else if (joypad() & J_DOWN)ply++,pldown=1, camera_y++, redraw = TRUE;
+                if (joypad() & J_UP)ply--, pldown=-1, camera_y--, redraw = TRUE;
+                else if (joypad() & J_DOWN)ply++, pldown=1, camera_y++, redraw = TRUE;
                 else if ((joypad() & J_LEFT)||(joypad() & J_RIGHT)) pldown=0;
+                if ((joypad() & J_LEFT)||(joypad() & J_RIGHT)||(joypad() & J_UP)||(joypad() & J_DOWN)) {
+                    if (frc%14==0) move_sprite(0,84,81);
+                    else if (frc%7==0) move_sprite(0,84,80);
+                }
             if ((joypad() & J_B) && (stamina>50)) {
             mstamina(50);
             plxs=2*plright;
@@ -814,19 +849,43 @@ void main(void) {
 
             //enemy movement and collision
             for (needle=0;needle<en_num;needle++) {
-                if ((enxs[needle]!=0)||(enys[needle]!=0)){
+                    //checks if what the tile horizontal is available, and then the tile vertical to the enemy
+                    front_tile=map_mapPLN0[((enx[needle]+4+enxs[needle])/8)+map_mapWidth*((eny[needle]+4+enys[needle])/8)];
+                    for (mptr=0;mptr<sizeof collision_detection / sizeof collision_detection[0];mptr++){
+                    if (front_tile==collision_detection[mptr]){
+                        if (encan_move[needle]==0) enxs[needle]=-enxs[needle], enys[needle]=-enys[needle];
+                        else enxs[needle]=0, enys[needle]=0;
+                        break;
+                    }
+                    }
                 enx[needle]+=enxs[needle];
                 eny[needle]+=enys[needle];
                 scroll_sprite(sprite_num-en_num+needle+2,enxs[needle],enys[needle]);
-                front_tile=map_mapPLN0[floor(enx[needle],8)+map_mapWidth*floor(eny[needle],8)];
-                for (mptr=0;mptr<sizeof collision_detection / sizeof collision_detection[0];mptr++){
-                if (front_tile==collision_detection[mptr]){
-                    enxs[needle]=0;
-                    enys[needle]=0;
-                    break;
+
+            if ((encan_move[needle]==1) && (can_move<2)) {
+                    if (abs(plx-enx[needle])>abs(ply-eny[needle])) {
+                        if (plx>enx[needle]) enxs[needle]=1, enys[needle]=0;
+                        else enxs[needle]=-1, enys[needle]=0;
+                    }
+                    else if (ply>eny[needle]) enys[needle]=1, enxs[needle]=0;
+                    else enys[needle]=-1, enxs[needle]=0;
+
+                    //attack
+                    if ((abs(plx-enx[needle])<12) && (abs(ply-eny[needle])<12)) {
+                        enxs[needle]=0;
+                        enys[needle]=0;
+                        encan_move[needle]=0;
+                        event(30, en_attack1);
+                        eva[evc][0]=needle;
+                        eva[evc][1]=plx;
+                        eva[evc][2]=ply;
+                        NR10_REG=0X00;
+                        NR11_REG=0X50;
+                        NR12_REG=0X43;
+                        NR13_REG=0X73;
+                        NR14_REG=0X86;
+                    }
                 }
-            }
-            }
             }
 
 
@@ -842,7 +901,7 @@ void main(void) {
         if (redraw) {
             //collision detection
             mptr=0;
-            front_tile=map_mapPLN0[floor(plx+4-4*plright,8)+map_mapWidth*floor(ply+4-4*pldown,8)+plright+map_mapWidth*pldown];
+            front_tile=map_mapPLN0[((plx+4+4*plright)/8)+(map_mapWidth*((ply+7+pldown)/8))];
             for (needle=0;needle<sizeof collision_detection / sizeof collision_detection[0];needle++){
             if (front_tile==collision_detection[needle]){
                 mptr=1;
@@ -851,6 +910,7 @@ void main(void) {
             }
     
             if (mptr==0) {        
+            scroll_sprite(1, old_camera_x-camera_x,old_camera_y-camera_y);
             for (needle=0; needle<sprite_num; needle++){
                 if ((needle<(sprite_num-en_num)) || (encan_move[needle-(sprite_num-en_num)]!=9)) scroll_sprite(needle+2, old_camera_x-camera_x,old_camera_y-camera_y);
             }
