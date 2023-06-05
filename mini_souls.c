@@ -848,6 +848,7 @@ void main(void) {
             }
 
             //enemy movement and collision
+            if (can_move<2){
             for (needle=0;needle<en_num;needle++) {
                     //checks if what the tile horizontal is available, and then the tile vertical to the enemy
                     front_tile=map_mapPLN0[((enx[needle]+4+enxs[needle])/8)+map_mapWidth*((eny[needle]+4+enys[needle])/8)];
@@ -862,7 +863,7 @@ void main(void) {
                 eny[needle]+=enys[needle];
                 scroll_sprite(sprite_num-en_num+needle+2,enxs[needle],enys[needle]);
 
-            if ((encan_move[needle]==1) && (can_move<2)) {
+            if (encan_move[needle]==1) {
                     if (abs(plx-enx[needle])>abs(ply-eny[needle])) {
                         if (plx>enx[needle]) enxs[needle]=1, enys[needle]=0;
                         else enxs[needle]=-1, enys[needle]=0;
@@ -887,7 +888,7 @@ void main(void) {
                     }
                 }
             }
-
+            
 
             if ((plxs)||(plys)) redraw=TRUE;
             camera_x+=plxs, camera_y+=plys, plx+=plxs, ply+=plys;
@@ -897,6 +898,7 @@ void main(void) {
             //events
             for (needle=0; needle<=127; needle++) {
                 if (ev[needle]==frc) (*evf[needle])(), ev[needle]=0;
+            }
             }
         if (redraw) {
             //collision detection
