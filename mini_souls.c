@@ -222,7 +222,7 @@ uint8_t en_ahlt(int n){
 }
 
 /*checks  if the player can move*/
-//0=player cannot move  1=normal movement  2=menu  3=weapons  4=armour  5=items  6=friends 7=interact (text) 8=bonfire
+//0=player cannot move 1=normal movement  2=attacking  3=weapons  4=armour  5=items  6=friends 7=interact (text) 8=bonfire 9=menu
 uint8_t can_move=1;
 
 //same things but for other entities (for now, max 32)
@@ -287,6 +287,7 @@ void plstop(){
     plxs=0;
     plys=0;
     can_move=1;
+    set_sprite_tile(0,0);
 }
 
 
@@ -344,10 +345,13 @@ void hit(uint8_t num) {
 
 /*animations block, please label carefully*/
 void attack_4() {
+    if (can_move==2){
     can_move=1;
     move_sprite(1, 0,0);
+    }
 }
 void attack_3() {
+    if (can_move==2){
     NR10_REG=0X00;
     NR11_REG=0X40;
     NR12_REG=0X33;
@@ -442,8 +446,10 @@ void attack_3() {
                 }
     }
     event(5,attack_4);
+    }
 }
 void attack_2() {
+    if (can_move==2){
     NR10_REG=0X00;
     NR11_REG=0X40;
     NR12_REG=0X33;
@@ -459,8 +465,10 @@ void attack_2() {
                         eva[evc][0]=i;
                     }
                 }
+    }
 }
 void attack_1() {
+    if (can_move==2){
     NR10_REG=0X00;
     NR11_REG=0X40;
     NR12_REG=0X33;
@@ -558,6 +566,7 @@ void attack_1() {
                 }
                 }
     set_sprite_tile(0,0);
+    }
 }
 
 void roll_1() {
@@ -566,21 +575,37 @@ void roll_1() {
 
 
 void en_attack2() {
+    if (encan_move[eva[needle][0]]==2) {
     move_sprite(1, 0,0);
-    if (encan_move[eva[needle][0]]==0) encan_move[eva[needle][0]]=1;
+    encan_move[eva[needle][0]]=1;
+}
 }
 
 void en_attack1() {
+    if (encan_move[eva[needle][0]]==2) {
     move_sprite(1,(eva[needle][1]-plx)+84,(eva[needle][2]-ply)+80);
     //player position is 16bit, eva is 8 so we need to put it on the same scale
-    if ((abs((plx%256)-eva[needle][1])<5)&&(abs((ply%256)-eva[needle][2])<5)&&(can_move==1)){
+    if ((abs((plx%256)-eva[needle][1])<5)&&(abs((ply%256)-eva[needle][2])<5)&&((can_move==1)||(can_move==2))){
     can_move=0;
+    set_sprite_tile(0,3);
     plxs=(plx-enx[eva[needle][0]])/abs(plx-enx[eva[needle][0]]);
     plys+=(ply-eny[eva[needle][0]])/abs(ply-eny[eva[needle][0]]);
+    event(20, plstop);
     }
+    //attack other enemies
+    for (mptr=0; mptr<en_num;mptr++) {
+                        if ((abs((enx[mptr]%256)-eva[needle][1])<5) && (abs((eny[mptr]%256)-eva[needle][2])<5) && (eva[needle][0]!=mptr)&&((encan_move[mptr]==1)||(encan_move[mptr]==2))) {
+                            enxs[mptr]=(enx[mptr]-enx[eva[needle][0]])/abs(enx[mptr]-enx[eva[needle][0]]);
+                            enys[mptr]=(eny[mptr]-eny[eva[needle][0]])/abs(eny[mptr]-eny[eva[needle][0]]);
+                            encan_move[mptr]=0;
+                            event(20, enstop);
+                            eva[evc][0]=mptr;
+                            break;
+                        }
+                    }
     event(30, en_attack2);
     eva[evc][0]=eva[needle][0];
-    event(20, plstop);
+}
 }
 
 
@@ -665,7 +690,7 @@ void main(void) {
                 NR13_REG=0X73;
                 NR14_REG=0X86;
                 event(10, attack_1);
-                can_move=0;
+                can_move=2;
                 mstamina(50);
                 set_sprite_tile(0,3);
             }
@@ -745,12 +770,12 @@ void main(void) {
                 set_sprite_tile(sprite_num+2,11);
                 move_sprite(sprite_num+2,22,66);
                 sprite_num++;
-                can_move=2;
+                can_move=9;
             }
              joypadPrevious=joypad();
             }
             //for the menu movement
-            else if (can_move==2) {
+            else if (can_move==9) {
                 /*here I use camera_y when moving the arrow. This does not move the camera, as you need to use set_camera() to actualize it
                 I onliny use it to measure the position of the arrow without having to make another variable  (good practices)*/
                 if ((joypad() & J_UP) && !(joypadPrevious & J_UP)) scroll_sprite(sprite_num+1, 0, -16), camera_y--;
@@ -847,8 +872,9 @@ void main(void) {
                 joypadPrevious=joypad();
             }
 
+            //all movement
+            if (can_move<3){
             //enemy movement and collision
-            if (can_move<2){
             for (needle=0;needle<en_num;needle++) {
                     //checks if what the tile horizontal is available, and then the tile vertical to the enemy
                     front_tile=map_mapPLN0[((enx[needle]+4+enxs[needle])/8)+map_mapWidth*((eny[needle]+4+enys[needle])/8)];
@@ -858,6 +884,14 @@ void main(void) {
                         else enxs[needle]=0, enys[needle]=0;
                         break;
                     }
+                    }
+                    //so enemies don't collide with each other
+                    for (mptr=0; mptr<en_num;mptr++) {
+                        if ((abs(enx[needle]+enxs[needle]-enx[mptr])<5) && (abs(eny[needle]+enys[needle]-eny[mptr])<5) && (needle!=mptr)) {
+                            enxs[needle]=0;
+                            enys[needle]=0;
+                            break;
+                        }
                     }
                 enx[needle]+=enxs[needle];
                 eny[needle]+=enys[needle];
@@ -875,7 +909,7 @@ void main(void) {
                     if ((abs(plx-enx[needle])<12) && (abs(ply-eny[needle])<12)) {
                         enxs[needle]=0;
                         enys[needle]=0;
-                        encan_move[needle]=0;
+                        encan_move[needle]=2;
                         event(30, en_attack1);
                         eva[evc][0]=needle;
                         eva[evc][1]=plx;
