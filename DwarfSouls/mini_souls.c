@@ -4,9 +4,8 @@
 #include <stdlib.h>
 
 #include "map_map.h"
-#include "win_map.h"
 #include "map_tiles.h"
-#include "empty_tiles.h"
+#include "text_tiles.h"
 
 #define camera_max_y ((map_mapHeight - 18) * 8) 
 #define camera_max_x ((map_mapWidth - 20) * 8) 
@@ -287,6 +286,7 @@ void plpush(){
     can_move=0;
 }
 void plstop(){
+    camera_x-=plxs, camera_y-=plys, plx-=plxs, ply-=plys;
     plxs=0;
     plys=0;
     can_move=1;
@@ -609,7 +609,6 @@ void room0() {
     set_camera();
     set_bkg_data(0, 18u, map_tiles);
     set_bkg_submap(map_pos_x, map_pos_y, 20, 18, map_map, map_mapWidth);
-    set_win_tiles(0,16,11,2, win_map);
     DISPLAY_ON;
     change_sprite(0,0x00,0x3c,0x3c,0x7d,0x3c,0x15,0x34,0x09,0xa5,0x7e,0x3c,0x01,0x00,0x3c,0x24,0x24); /*player model */
     //0x39,0x38,0x4c,0x74,0xbe,0xc2,0xb7,0xc9,0x6f,0x59,0xbf,0xc1,0x42,0x7e,0x3d,0x3c, /*roll animation*/
@@ -649,17 +648,8 @@ void room0() {
     SHOW_SPRITES;
     redraw=TRUE;
 }
-void soft_room0() {
-    DISPLAY_OFF;
-    SHOW_BKG;
-    set_camera();
-    set_bkg_data(0, 17u, map_tiles);
-    set_bkg_submap(map_pos_x, map_pos_y, 20, 18, map_map, map_mapWidth);
-    DISPLAY_ON;
-    redraw=TRUE;
-}
 
-void empty() {
+void soft_room0() {
     DISPLAY_OFF;
     SHOW_BKG;
     set_camera();
@@ -686,6 +676,8 @@ void main(void) {
 
 
     BGP_REG = OBP0_REG = OBP1_REG = 0xE4;
+    
+
     room0();
     set_sprite_tile(0,0);
     set_sprite_tile(1,1);
@@ -733,14 +725,14 @@ void main(void) {
             //interact
             if ((joypad() & J_SELECT) && !(joypadPrevious & J_SELECT)){
                 //bonfire
-                room0();
                 if (((plx+4-4*plright)>>3)+map_mapWidth*((ply+4-4*pldown)>>3)+plright+map_mapWidth*pldown==bonfire) {
                     //reset states
-                    sprite_num-=en_num;
-                    en_num=0;
                     camera_x = 230;
                     camera_y = 254;
+                    set_camera();
                     redraw=TRUE;
+                    HIDE_WIN;
+                    set_bkg_data(0, 26u, text_tiles);
                     for(mptr=0; mptr<20; mptr++) printf("\n");
                     printf("Level: %d\n\nHealthy boy: %d\nMagic: %d\nStrength: %d\nDexterity: %d\nIntelligence: %d\n\nForest\nAffinity: %d\n\nPressure: %d\nRequired: %d\n\n\n", stats[0]+stats[1]+stats[2]+stats[3]+stats[4]+stats[5], stats[0], stats[1], stats[2],stats[3],stats[4],stats[5], pressure,(stats[0]+stats[1]+stats[2]+stats[3]+stats[4]+stats[5])*3 );
                     change_sprite(1,0x08,0x08,0x04,0x0c,0x7a,0x76,0xfd,0x83,0xfd,0x83,0x7a,0x76,0x04,0x0c,0x08,0x08);
@@ -757,7 +749,6 @@ void main(void) {
                     camera_y = 294;
                     set_camera();
                     redraw=TRUE;
-                    set_bkg_data(0, 1u, empty_tiles);
                     for(mptr=0; mptr<20; mptr++) printf("\n");
                     can_move=7;
                     //couldn't make all the text fit in ram, so it goes in memory instead WARNING: VERY LONG, PLEASE COLLAPSE
@@ -809,7 +800,6 @@ void main(void) {
             }
             else if ((joypad() & J_A) && !(joypadPrevious & J_A)){
                 HIDE_WIN;
-                set_bkg_data(0, 1u, empty_tiles);
                 if (camera_y==294) printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\nList of weapons");
                 else if (camera_y==295) printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\nList of armour");
                 else if (camera_y==296) printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\nList of items");
@@ -817,7 +807,6 @@ void main(void) {
             }
             else if ((joypad() & J_B) && !(joypadPrevious & J_B)){
                 HIDE_WIN;
-                set_bkg_data(0, 1u, empty_tiles);
                 printf("\n\n\n\n\nLittle Dwarf\n\n\nWeapon\n\nArmor\n\nItems\n\nBest friend");
                 can_move=9;
             }
@@ -919,13 +908,16 @@ void main(void) {
                 }
             else if (encan_move[needle]==2) {
                 //player position is 16bit, enatt is 8 so we need to put it on the same scale
+                //player takes hit
                 if ((abs((plx&255)-enattx[needle])<5)&&(abs((ply&255)-enatty[needle])<5)&&(can_move!=0)){
                 can_move=0;
                 change_sprite(0,0x00,0x3c,0x3c,0x41,0x3c,0x29,0x34,0x3d,0xa5,0xdb,0x3c,0x3d,0x00,0x3c,0x24,0x00);
+                
                 plxs=((plx-enx[needle])>0)*2-1;
                 plys=((ply-eny[needle])>0)*2-1;
-                event(20, plstop);
-                }
+
+                event(20, plstop);             
+                    }
     }
             }
             
@@ -934,7 +926,7 @@ void main(void) {
             camera_x+=plxs, camera_y+=plys, plx+=plxs, ply+=plys;
             if (frc==255) frc=1;
             else frc++;
-            if (stamina<144) stamina++/*, plot(stamina+8, 5, DKGREY, SOLID)*/;
+            if (stamina<144) stamina++;
             //events
             for (needle=0; needle<=127; needle++) {
                 if (ev[needle]==frc) (*evf[needle])(), ev[needle]=0;
@@ -950,17 +942,13 @@ void main(void) {
                 break;
             }
             }
-    
-            if (mptr==0) {        
+            if (mptr==1) {
+                if (can_move==0) plx-=plxs, ply-=plys, camera_x-=plxs, camera_y-=plys;
+                else plx-=plright,ply-=pldown, camera_x-=plright, camera_y-=pldown;
+            }
             scroll_sprite(1, old_camera_x-camera_x,old_camera_y-camera_y);
             for (needle=0; needle<sprite_num; needle++){
                 if ((needle<(sprite_num-en_num)) || (encan_move[needle-(sprite_num-en_num)]!=9)) scroll_sprite(needle+2, old_camera_x-camera_x,old_camera_y-camera_y);
-            }
-            
-            }
-            else {
-                if (can_move==0) plx-=plxs, ply-=plys, camera_x-=plxs, camera_y-=plys;
-                else plx-=plright,ply-=pldown, camera_x-=plright, camera_y-=pldown;
             }
             redraw = FALSE;
             set_camera();
